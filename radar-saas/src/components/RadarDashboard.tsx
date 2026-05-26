@@ -614,9 +614,7 @@ export function RadarDashboard() {
             <Box
               sx={{
                 mt: 3,
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1fr) 380px" },
-                gap: 3
+                display: "block"
               }}
             >
               <Card>
@@ -636,7 +634,7 @@ export function RadarDashboard() {
                       gridTemplateColumns: {
                         xs: "1fr",
                         md: "repeat(2, minmax(0, 1fr))",
-                        xl: "repeat(3, minmax(0, 1fr))"
+                        lg: "repeat(3, minmax(0, 1fr))"
                       },
                       gap: 2
                     }}
@@ -647,7 +645,6 @@ export function RadarDashboard() {
                   </Box>
                 </CardContent>
               </Card>
-              <SignalBalance />
             </Box>
 
             <Box
@@ -662,6 +659,7 @@ export function RadarDashboard() {
               <Stack spacing={3}>
                 <ApprovalQueue />
                 <WorkLedger />
+                <SignalBalance />
               </Stack>
             </Box>
           </Box>
