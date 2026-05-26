@@ -7,6 +7,7 @@ import {
   Bell,
   Bot,
   Building2,
+  CalendarDays,
   CheckCircle2,
   ChevronRight,
   Compass,
@@ -26,6 +27,8 @@ import {
   TrendingUp,
   Users
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   alpha,
@@ -106,7 +109,74 @@ const priorityTone: Record<
 
 const quickFilters = ["All", "Needs attention", "Ready to approve", "Growth", "Risks"];
 
+const workspaceRoutes = {
+  executive: "/",
+  search: "/search",
+  ai: "/ai-visibility",
+  reputation: "/reputation",
+  reviews: "/reviews",
+  local: "/local",
+  social: "/social",
+  influencer: "/influencers",
+  trend: "/trends",
+  authority: "/authority",
+  competitor: "/competitors",
+  funnel: "/funnel"
+} as const;
+
+const moduleById = Object.fromEntries(radarModules.map((module) => [module.id, module])) as Record<
+  RadarModule["id"],
+  RadarModule
+>;
+
+const navGroups = [
+  {
+    label: "COMMAND",
+    items: [
+      { label: "Overview", href: "/", icon: Gauge, count: "91" },
+      { label: "Approvals", href: "/approvals", icon: CheckCircle2, count: "4" },
+      { label: "Activity", href: "/activity", icon: Activity, count: "24" },
+      { label: "Reports", href: "/reports", icon: BarChart3, count: "8" }
+    ]
+  },
+  {
+    label: "VISIBILITY",
+    items: [
+      { label: "Search", href: workspaceRoutes.search, icon: Globe2, count: "84" },
+      { label: "AI Visibility", href: workspaceRoutes.ai, icon: Bot, count: "72" },
+      { label: "Local Presence", href: workspaceRoutes.local, icon: Building2, count: "88" },
+      { label: "Authority", href: workspaceRoutes.authority, icon: Network, count: "70" }
+    ]
+  },
+  {
+    label: "TRUST",
+    items: [
+      { label: "Reputation", href: workspaceRoutes.reputation, icon: ShieldCheck, count: "68" },
+      { label: "Reviews", href: workspaceRoutes.reviews, icon: MessageSquareReply, count: "79" }
+    ]
+  },
+  {
+    label: "GROWTH",
+    items: [
+      { label: "Social", href: workspaceRoutes.social, icon: Megaphone, count: "76" },
+      { label: "Influencers", href: workspaceRoutes.influencer, icon: Users, count: "63" },
+      { label: "Trends", href: workspaceRoutes.trend, icon: TrendingUp, count: "81" },
+      { label: "Competitors", href: workspaceRoutes.competitor, icon: Target, count: "74" },
+      { label: "Funnel", href: workspaceRoutes.funnel, icon: LineChart, count: "86" }
+    ]
+  },
+  {
+    label: "OPERATIONS",
+    items: [
+      { label: "Calendar", href: "/calendar", icon: CalendarDays, count: "6" },
+      { label: "Settings", href: "/settings", icon: Compass, count: "" }
+    ]
+  }
+];
+
 function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <Box
       component="aside"
@@ -150,46 +220,56 @@ function Sidebar() {
 
       <Divider />
 
-      <Box sx={{ px: 2, py: 2 }}>
-        <Typography variant="caption" sx={{ px: 1.5, fontWeight: 800, color: "text.secondary" }}>
-            GROWTH AREAS
-        </Typography>
-        <List dense disablePadding sx={{ mt: 1 }}>
-          {radarModules.map((module) => {
-            const Icon = iconMap[module.id as keyof typeof iconMap];
-            const selected = module.id === "executive";
+      <Box sx={{ px: 2, py: 2, overflowY: "auto" }}>
+        {navGroups.map((group) => (
+          <Box key={group.label} sx={{ mb: 2.5 }}>
+            <Typography variant="caption" sx={{ px: 1.5, fontWeight: 800, color: "text.secondary" }}>
+              {group.label}
+            </Typography>
+            <List dense disablePadding sx={{ mt: 1 }}>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const selected =
+                  item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-            return (
-              <ListItemButton
-                key={module.id}
-                selected={selected}
-                sx={{
-                  minHeight: 42,
-                  borderRadius: 2,
-                  mb: 0.5,
-                  "&.Mui-selected": {
-                    color: "primary.contrastText",
-                    bgcolor: "primary.main",
-                    boxShadow: "0 4px 12px rgba(115, 103, 240, 0.35)",
-                    "&:hover": { bgcolor: "primary.main" }
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 34, color: "inherit" }}>
-                  <Icon size={18} />
-                </ListItemIcon>
-                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                  <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>
-                    {module.shortName}
-                  </Typography>
-                </Box>
-                <Typography variant="caption" sx={{ fontWeight: 800 }}>
-                  {module.score}
-                </Typography>
-              </ListItemButton>
-            );
-          })}
-        </List>
+                return (
+                  <ListItemButton
+                    key={item.href}
+                    component={Link}
+                    href={item.href}
+                    selected={selected}
+                    sx={{
+                      minHeight: 42,
+                      borderRadius: 2,
+                      mb: 0.5,
+                      color: selected ? "primary.contrastText" : "text.primary",
+                      "&.Mui-selected": {
+                        color: "primary.contrastText",
+                        bgcolor: "primary.main",
+                        boxShadow: "0 4px 12px rgba(115, 103, 240, 0.35)",
+                        "&:hover": { bgcolor: "primary.main" }
+                      }
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 34, color: "inherit" }}>
+                      <Icon size={18} />
+                    </ListItemIcon>
+                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>
+                        {item.label}
+                      </Typography>
+                    </Box>
+                    {item.count ? (
+                      <Typography variant="caption" sx={{ fontWeight: 800 }}>
+                        {item.count}
+                      </Typography>
+                    ) : null}
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </Box>
+        ))}
       </Box>
     </Box>
   );
@@ -274,7 +354,7 @@ function CommandBrief() {
           sx={{
             p: 3,
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1.05fr repeat(3, minmax(0, 1fr))" },
+            gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "1.05fr repeat(3, minmax(0, 1fr))" },
             gap: 2,
             alignItems: "stretch"
           }}
@@ -444,16 +524,16 @@ function ModuleCard({ module }: { module: RadarModule }) {
             borderColor: alpha(module.accent, 0.18)
           }}
         >
-          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", minWidth: 0 }}>
             <Box sx={{ minWidth: 0, flexGrow: 1 }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
                 Suggested next step
               </Typography>
-              <Typography variant="body2" sx={{ mt: 0.25, fontWeight: 800 }}>
+              <Typography variant="body2" sx={{ mt: 0.25, fontWeight: 800, overflowWrap: "anywhere" }}>
                 {module.nextStep}
               </Typography>
             </Box>
-            <ChevronRight size={18} />
+            <ChevronRight size={18} style={{ flexShrink: 0 }} />
           </Stack>
         </Paper>
       </CardContent>
@@ -673,6 +753,10 @@ function TopBar() {
       sx={{
         minHeight: "72px !important",
         px: { xs: 2, md: 3 },
+        width: "100%",
+        maxWidth: "100%",
+        gap: 1,
+        overflow: "hidden",
         bgcolor: "background.paper",
         border: 1,
         borderColor: "divider",
@@ -683,13 +767,13 @@ function TopBar() {
       <IconButton sx={{ display: { lg: "none" }, mr: 1 }} aria-label="Open navigation">
         <Menu size={20} />
       </IconButton>
-      <Stack direction="row" spacing={1.25} sx={{ flexGrow: 1, minWidth: 0, alignItems: "center" }}>
-        <Search size={19} />
-        <Typography variant="body2" color="text.secondary" noWrap>
+      <Stack direction="row" spacing={1.25} sx={{ flexGrow: 1, minWidth: 0, alignItems: "center", overflow: "hidden" }}>
+        <Search size={19} style={{ flexShrink: 0 }} />
+        <Typography variant="body2" color="text.secondary" noWrap sx={{ display: { xs: "none", sm: "block" } }}>
           Search brands, competitors, approvals, reviews, and growth areas
         </Typography>
       </Stack>
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} sx={{ flexShrink: 0, alignItems: "center" }}>
         <Tooltip title="Notifications">
           <IconButton aria-label="Notifications">
             <Badge color="error" variant="dot">
@@ -702,7 +786,7 @@ function TopBar() {
           <Avatar sx={{ width: 32, height: 32, bgcolor: "success.main", fontSize: 13 }}>SEO</Avatar>
           <Avatar sx={{ width: 32, height: 32, bgcolor: "warning.main", fontSize: 13 }}>CX</Avatar>
         </AvatarGroup>
-        <Button variant="contained" startIcon={<Sparkles size={17} />}>
+        <Button variant="contained" startIcon={<Sparkles size={17} />} sx={{ display: { xs: "none", sm: "inline-flex" } }}>
           Run scan
         </Button>
         <Button variant="outlined" startIcon={<CheckCircle2 size={17} />} sx={{ display: { xs: "none", sm: "inline-flex" } }}>
@@ -713,6 +797,471 @@ function TopBar() {
   );
 }
 
+function RadarShell({ children }: { children: ReactNode }) {
+  return (
+    <ThemeProvider theme={radarTheme}>
+      <CssBaseline />
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+        <Sidebar />
+        <Box sx={{ ml: { lg: `${drawerWidth}px` }, p: { xs: 2, md: 3 }, minWidth: 0, overflowX: "hidden" }}>
+          <TopBar />
+          {children}
+        </Box>
+      </Box>
+    </ThemeProvider>
+  );
+}
+
+const workspaceConfigs = {
+  search: {
+    moduleId: "search",
+    title: "Search Workspace",
+    subtitle: "Improve how people find the brand on Google and other search surfaces.",
+    primaryAction: "Create search task",
+    focus: ["Priority pages", "Ranking blockers", "Content gaps"]
+  },
+  "ai-visibility": {
+    moduleId: "ai",
+    title: "AI Visibility Workspace",
+    subtitle: "Track whether AI tools mention the brand correctly and what sources they trust.",
+    primaryAction: "Track prompt",
+    focus: ["AI answers", "Competitor mentions", "Source accuracy"]
+  },
+  reputation: {
+    moduleId: "reputation",
+    title: "Reputation Workspace",
+    subtitle: "Protect trust by watching public conversations, risks, and sensitive mentions.",
+    primaryAction: "Open risk review",
+    focus: ["Sensitive mentions", "Trust risks", "Response status"]
+  },
+  reviews: {
+    moduleId: "reviews",
+    title: "Review Workspace",
+    subtitle: "Manage reviews, reply drafts, escalations, and customer feedback patterns.",
+    primaryAction: "Draft replies",
+    focus: ["New reviews", "Reply drafts", "Escalations"]
+  },
+  local: {
+    moduleId: "local",
+    title: "Local Presence Workspace",
+    subtitle: "Keep locations, services, hours, and customer actions accurate everywhere.",
+    primaryAction: "Check locations",
+    focus: ["Locations", "Business details", "Local actions"]
+  },
+  social: {
+    moduleId: "social",
+    title: "Social Workspace",
+    subtitle: "See which social conversations, posts, and audiences need attention.",
+    primaryAction: "Plan posts",
+    focus: ["Conversations", "Content ideas", "Audience response"]
+  },
+  influencers: {
+    moduleId: "influencer",
+    title: "Influencer Workspace",
+    subtitle: "Find creators that fit the brand and avoid unsafe partnerships.",
+    primaryAction: "Find creators",
+    focus: ["Creator fit", "Brand safety", "Campaign pipeline"]
+  },
+  trends: {
+    moduleId: "trend",
+    title: "Trend Workspace",
+    subtitle: "Spot topics early and decide when the brand should join the conversation.",
+    primaryAction: "Review trends",
+    focus: ["Rising topics", "Timing", "Content opportunities"]
+  },
+  authority: {
+    moduleId: "authority",
+    title: "Authority Workspace",
+    subtitle: "Build trust through mentions, media, links, partners, and expert signals.",
+    primaryAction: "Find opportunities",
+    focus: ["Trusted mentions", "Partner links", "Media signals"]
+  },
+  competitors: {
+    moduleId: "competitor",
+    title: "Competitor Workspace",
+    subtitle: "Understand where competitors are winning attention and how to respond.",
+    primaryAction: "Compare competitors",
+    focus: ["Visibility gaps", "AI mentions", "Review comparison"]
+  },
+  funnel: {
+    moduleId: "funnel",
+    title: "Funnel Workspace",
+    subtitle: "Connect visibility work to leads, sales opportunities, and likely business impact.",
+    primaryAction: "Plan buyer pages",
+    focus: ["Buyer gaps", "Lead intent", "Sales opportunity"]
+  }
+} as const;
+
+export type WorkspaceId = keyof typeof workspaceConfigs;
+
+function WorkspaceInsights({ module }: { module: RadarModule }) {
+  const tone = statusTone[module.status];
+  const priority = priorityTone[module.priority];
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(3, minmax(0, 1fr))" },
+        gap: 3
+      }}
+    >
+      <MetricCard
+        title="Health Score"
+        value={`${module.score}`}
+        change={module.change}
+        icon={<Gauge size={24} />}
+        color={module.accent}
+      />
+      <MetricCard
+        title="Checks Completed"
+        value={module.signalCount.toLocaleString()}
+        change="Fresh scan data"
+        icon={<CheckCircle2 size={24} />}
+        color="#28c76f"
+      />
+      <Card>
+        <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}>
+            <Chip label={tone.label} color={tone.color} size="small" variant="outlined" />
+            <Chip label={priority.label} color={priority.color} size="small" />
+          </Stack>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+            Suggested next step
+          </Typography>
+          <Typography variant="body1" sx={{ mt: 1, fontWeight: 900, overflowWrap: "anywhere" }}>
+            {module.nextStep}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+}
+
+function WorkspaceActionTable({ module }: { module: RadarModule }) {
+  const rows = [
+    {
+      item: module.nextStep,
+      owner: module.owner,
+      status: "Needs review",
+      impact: module.priority
+    },
+    {
+      item: `Update ${module.name.toLowerCase()} report for leadership`,
+      owner: "Strategy",
+      status: "Drafted",
+      impact: "Medium"
+    },
+    {
+      item: `Add evidence to the next ${module.shortName.toLowerCase()} recommendation`,
+      owner: "Analyst",
+      status: "In progress",
+      impact: "Low"
+    }
+  ];
+
+  return (
+    <Card>
+      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ p: 3, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between" }}
+        >
+          <Box>
+            <Typography variant="h6">Action Queue</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Tasks, owners, and next steps for this workspace.
+            </Typography>
+          </Box>
+          <Button variant="outlined" size="small" endIcon={<ChevronRight size={16} />}>
+            View all
+          </Button>
+        </Stack>
+        <Divider />
+        <Box sx={{ display: { xs: "block", md: "none" }, p: 2 }}>
+          <Stack spacing={1.25}>
+            {rows.map((row) => (
+              <Paper key={row.item} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                  {row.item}
+                </Typography>
+                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap", gap: 1 }}>
+                  <Chip label={row.owner} size="small" variant="outlined" />
+                  <Chip label={row.status} size="small" variant="outlined" />
+                  <Chip
+                    label={row.impact}
+                    size="small"
+                    color={row.impact === "High" ? "error" : row.impact === "Medium" ? "warning" : "success"}
+                  />
+                </Stack>
+              </Paper>
+            ))}
+          </Stack>
+        </Box>
+        <TableContainer sx={{ display: { xs: "none", md: "block" } }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Task</TableCell>
+                <TableCell>Owner</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Impact</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow key={row.item} hover>
+                  <TableCell sx={{ minWidth: 280 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      {row.item}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{row.owner}</TableCell>
+                  <TableCell>
+                    <Chip label={row.status} size="small" variant="outlined" />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={row.impact}
+                      size="small"
+                      color={row.impact === "High" ? "error" : row.impact === "Medium" ? "warning" : "success"}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function RadarWorkspace({ workspaceId }: { workspaceId: WorkspaceId }) {
+  const config = workspaceConfigs[workspaceId];
+  const module = moduleById[config.moduleId];
+  const Icon = iconMap[module.id as keyof typeof iconMap];
+
+  return (
+    <RadarShell>
+      <Box sx={{ mt: 3 }}>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          sx={{ mb: 3, alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between" }}
+        >
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { xs: "flex-start", sm: "center" }, minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                display: "grid",
+                placeItems: "center",
+                borderRadius: 2,
+                color: module.accent,
+                bgcolor: alpha(module.accent, 0.12),
+                flexShrink: 0
+              }}
+            >
+              <Icon size={24} />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="h4" sx={{ fontSize: { xs: "1.75rem", md: "2.125rem" }, overflowWrap: "anywhere" }}>
+                {config.title}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+                {config.subtitle}
+              </Typography>
+            </Box>
+          </Stack>
+          <Button variant="contained" startIcon={<Sparkles size={17} />} sx={{ width: { xs: "100%", md: "auto" } }}>
+            {config.primaryAction}
+          </Button>
+        </Stack>
+
+        <Box sx={{ mb: 3, display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {config.focus.map((item) => (
+            <Chip key={item} label={item} color="primary" variant="outlined" />
+          ))}
+        </Box>
+
+        <WorkspaceInsights module={module} />
+
+        <Box
+          sx={{
+            mt: 3,
+            display: "grid",
+            gridTemplateColumns: { xs: "minmax(0, 1fr)", xl: "minmax(0, 1.15fr) minmax(340px, 0.85fr)" },
+            gap: 3
+          }}
+        >
+          <WorkspaceActionTable module={module} />
+          <Stack spacing={3}>
+            <ModuleCard module={module} />
+            <WorkLedger />
+          </Stack>
+        </Box>
+      </Box>
+    </RadarShell>
+  );
+}
+
+function ApprovalBoard() {
+  const columns = [
+    {
+      title: "Detected",
+      color: "#00bad1",
+      cards: ["New review pattern found", "Competitor gained AI mention"]
+    },
+    {
+      title: "Drafted",
+      color: "#7367f0",
+      cards: ["Positive review replies", "Search-friendly page details"]
+    },
+    {
+      title: "Needs Approval",
+      color: "#ff9f43",
+      cards: approvals.map((approval) => approval.title)
+    },
+    {
+      title: "Published",
+      color: "#28c76f",
+      cards: ["Updated local service details", "Replied to two safe reviews"]
+    }
+  ];
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
+        gap: 3
+      }}
+    >
+      {columns.map((column) => (
+        <Card key={column.title}>
+          <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+            <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+              <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: column.color }} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                  {column.title}
+                </Typography>
+              </Stack>
+              <Chip label={column.cards.length} size="small" />
+            </Stack>
+            <Stack spacing={1.5}>
+              {column.cards.map((card) => (
+                <Paper key={card} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                    {card}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
+                    Review evidence, owner, and risk before publishing.
+                  </Typography>
+                </Paper>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
+}
+
+export function RadarApprovalsPage() {
+  return (
+    <RadarShell>
+      <Box sx={{ mt: 3 }}>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          sx={{ mb: 3, alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between" }}
+        >
+          <Box>
+            <Typography variant="h4">Approval Board</Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              Review changes before they affect public pages, reviews, or campaigns.
+            </Typography>
+          </Box>
+          <Button variant="contained" startIcon={<CheckCircle2 size={17} />}>
+            Review approvals
+          </Button>
+        </Stack>
+        <ApprovalBoard />
+      </Box>
+    </RadarShell>
+  );
+}
+
+const utilityPages = {
+  activity: {
+    title: "Activity",
+    subtitle: "A timeline of scans, recommendations, approvals, and published changes.",
+    icon: Activity
+  },
+  reports: {
+    title: "Reports",
+    subtitle: "Executive summaries, scheduled reports, and shareable client updates.",
+    icon: BarChart3
+  },
+  calendar: {
+    title: "Calendar",
+    subtitle: "Content, review replies, reports, scans, and campaign deadlines in one place.",
+    icon: CalendarDays
+  },
+  settings: {
+    title: "Settings",
+    subtitle: "Manage brand rules, integrations, notifications, users, and approval policies.",
+    icon: Compass
+  }
+} as const;
+
+export type UtilityPageId = keyof typeof utilityPages;
+
+export function RadarUtilityPage({ pageId }: { pageId: UtilityPageId }) {
+  const page = utilityPages[pageId];
+  const Icon = page.icon;
+
+  return (
+    <RadarShell>
+      <Box sx={{ mt: 3 }}>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 3 }}>
+          <Box
+            sx={{
+              width: 52,
+              height: 52,
+              display: "grid",
+              placeItems: "center",
+              borderRadius: 2,
+              color: "primary.main",
+              bgcolor: alpha("#7367f0", 0.12)
+            }}
+          >
+            <Icon size={24} />
+          </Box>
+          <Box>
+            <Typography variant="h4">{page.title}</Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              {page.subtitle}
+            </Typography>
+          </Box>
+        </Stack>
+        <Card>
+          <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+            <Typography variant="h6">Workspace foundation</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              This route is now part of the product shell. The next pass can turn it into a full Vuexy-style
+              workspace with tables, drawers, filters, and saved views.
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
+    </RadarShell>
+  );
+}
+
 export function RadarDashboard() {
   const executiveScore = radarModules[0]?.score ?? 0;
   const activeRisks = radarModules.filter((module) => module.status === "risk").length;
@@ -720,13 +1269,7 @@ export function RadarDashboard() {
   const growthItems = radarModules.filter((module) => module.status === "growth").length;
 
   return (
-    <ThemeProvider theme={radarTheme}>
-      <CssBaseline />
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-        <Sidebar />
-        <Box sx={{ ml: { lg: `${drawerWidth}px` }, p: { xs: 2, md: 3 } }}>
-          <TopBar />
-
+    <RadarShell>
           <Box sx={{ mt: 3 }}>
             <Stack
               direction={{ xs: "column", md: "row" }}
@@ -749,7 +1292,7 @@ export function RadarDashboard() {
                 mt: 3,
                 display: "grid",
                 gridTemplateColumns: {
-                  xs: "1fr",
+                  xs: "minmax(0, 1fr)",
                   sm: "repeat(2, minmax(0, 1fr))",
                   xl: "repeat(4, minmax(0, 1fr))"
                 },
@@ -817,7 +1360,7 @@ export function RadarDashboard() {
                     sx={{
                       display: "grid",
                       gridTemplateColumns: {
-                        xs: "1fr",
+                        xs: "minmax(0, 1fr)",
                         md: "repeat(2, minmax(0, 1fr))",
                         lg: "repeat(3, minmax(0, 1fr))"
                       },
@@ -836,7 +1379,7 @@ export function RadarDashboard() {
               sx={{
                 mt: 3,
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1.2fr) minmax(340px, 0.8fr)" },
+                gridTemplateColumns: { xs: "minmax(0, 1fr)", xl: "minmax(0, 1.2fr) minmax(340px, 0.8fr)" },
                 gap: 3
               }}
             >
@@ -848,8 +1391,6 @@ export function RadarDashboard() {
               </Stack>
             </Box>
           </Box>
-        </Box>
-      </Box>
-    </ThemeProvider>
+    </RadarShell>
   );
 }
