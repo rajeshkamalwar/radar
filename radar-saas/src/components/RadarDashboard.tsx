@@ -125,7 +125,7 @@ function Sidebar() {
             RADAR
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Enterprise visibility OS
+            Brand growth command center
           </Typography>
         </Box>
       </Stack>
@@ -134,7 +134,7 @@ function Sidebar() {
 
       <Box sx={{ px: 2, py: 2 }}>
         <Typography variant="caption" sx={{ px: 1.5, fontWeight: 800, color: "text.secondary" }}>
-          INTELLIGENCE CENTERS
+            GROWTH AREAS
         </Typography>
         <List dense disablePadding sx={{ mt: 1 }}>
           {radarModules.map((module) => {
@@ -277,7 +277,7 @@ function ModuleCard({ module }: { module: RadarModule }) {
               {module.change}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {module.signalCount.toLocaleString()} signals
+              {module.signalCount.toLocaleString()} checks
             </Typography>
           </Box>
         </Stack>
@@ -307,9 +307,9 @@ function SignalBalance() {
       <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
         <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
           <Box>
-            <Typography variant="h6">Signal Balance</Typography>
+            <Typography variant="h6">Channel Health</Typography>
             <Typography variant="body2" color="text.secondary">
-              Cross-channel visibility health
+              A quick view of where the brand is strongest and weakest
             </Typography>
           </Box>
           <Activity size={20} />
@@ -526,7 +526,7 @@ function TopBar() {
       <Stack direction="row" spacing={1.25} sx={{ flexGrow: 1, minWidth: 0, alignItems: "center" }}>
         <Search size={19} />
         <Typography variant="body2" color="text.secondary" noWrap>
-          Search brands, signals, competitors, approvals, and intelligence centers
+          Search brands, competitors, approvals, reviews, and growth areas
         </Typography>
       </Stack>
       <Stack direction="row" spacing={1}>
@@ -564,7 +564,7 @@ export function RadarDashboard() {
               <Box>
                 <Typography variant="h4">Command Center</Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                  Reputation, Authority, Discovery, Analytics & Response across every public brand signal.
+                  One place to see how the brand is found, trusted, discussed, and chosen.
                 </Typography>
               </Box>
               <Chip color="success" label="Live signal scan" />
@@ -582,7 +582,7 @@ export function RadarDashboard() {
               }}
             >
               <MetricCard
-                title="Enterprise Visibility"
+                title="Overall Visibility"
                 value={`${executiveScore}`}
                 change="+8.4% this cycle"
                 icon={<Gauge size={24} />}
@@ -591,7 +591,7 @@ export function RadarDashboard() {
               <MetricCard
                 title="Growth Centers"
                 value={`${growthItems}`}
-                change="Signals compounding"
+                change="Momentum is building"
                 icon={<TrendingUp size={24} />}
                 color="#28c76f"
               />
@@ -621,9 +621,9 @@ export function RadarDashboard() {
                 <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
                   <Stack direction="row" sx={{ mb: 2.5, alignItems: "center", justifyContent: "space-between" }}>
                     <Box>
-                      <Typography variant="h6">Specialist Intelligence Centers</Typography>
+                      <Typography variant="h6">Growth Areas</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Each center owns its score, signals, workflow, and response authority.
+                        Each area shows what is working, what needs attention, and what to do next.
                       </Typography>
                     </Box>
                     <Chip label="12 centers" color="primary" variant="outlined" />

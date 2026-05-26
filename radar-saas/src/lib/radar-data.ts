@@ -44,7 +44,7 @@ export const radarModules: RadarModule[] = [
     id: "executive",
     name: "Executive Command",
     shortName: "Executive",
-    description: "Board-level command view for risk, growth, proof, and pending decisions.",
+    description: "A clear leadership view of what is improving, what needs attention, and what needs approval.",
     score: 91,
     status: "growth",
     signalCount: 421,
@@ -57,7 +57,7 @@ export const radarModules: RadarModule[] = [
     id: "search",
     name: "Search",
     shortName: "Search",
-    description: "SEO, Google positioning, SERP features, backlinks, and technical health.",
+    description: "Shows how easily people can find the brand on Google and what is holding rankings back.",
     score: 84,
     status: "growth",
     signalCount: 1842,
@@ -70,7 +70,7 @@ export const radarModules: RadarModule[] = [
     id: "ai",
     name: "AI Visibility",
     shortName: "AI",
-    description: "ChatGPT, Google AI, Gemini, Perplexity, citations, and answer accuracy.",
+    description: "Tracks whether AI tools mention the brand correctly and whether competitors are showing up instead.",
     score: 72,
     status: "watch",
     signalCount: 316,
@@ -83,7 +83,7 @@ export const radarModules: RadarModule[] = [
     id: "reputation",
     name: "Reputation",
     shortName: "Reputation",
-    description: "ORM, public sentiment, crisis signals, negative results, and misinformation.",
+    description: "Watches what people are saying online and flags anything that could hurt trust.",
     score: 68,
     status: "risk",
     signalCount: 92,
@@ -96,7 +96,7 @@ export const radarModules: RadarModule[] = [
     id: "reviews",
     name: "Reviews",
     shortName: "Reviews",
-    description: "Real-time reviews, auto-reply drafts, escalation, and rating intelligence.",
+    description: "Tracks customer reviews, drafts safe replies, and highlights reviews that need human care.",
     score: 79,
     status: "watch",
     signalCount: 554,
@@ -109,7 +109,7 @@ export const radarModules: RadarModule[] = [
     id: "local",
     name: "Local Presence",
     shortName: "Local",
-    description: "Google Business Profile, map pack visibility, NAP, and locations.",
+    description: "Helps local customers find the right locations, hours, services, and contact details.",
     score: 88,
     status: "growth",
     signalCount: 231,
@@ -122,7 +122,7 @@ export const radarModules: RadarModule[] = [
     id: "social",
     name: "Social",
     shortName: "Social",
-    description: "Social listening, engagement, SMM workflows, comments, and share of voice.",
+    description: "Shows how the brand is performing on social channels and which conversations matter.",
     score: 76,
     status: "watch",
     signalCount: 1290,
@@ -135,7 +135,7 @@ export const radarModules: RadarModule[] = [
     id: "influencer",
     name: "Influencers",
     shortName: "Influencer",
-    description: "Creator discovery, audience fit, brand safety, UGC, and campaign prediction.",
+    description: "Finds suitable creators and checks whether they are a safe fit for the brand.",
     score: 63,
     status: "watch",
     signalCount: 148,
@@ -148,7 +148,7 @@ export const radarModules: RadarModule[] = [
     id: "trend",
     name: "Trends",
     shortName: "Trends",
-    description: "Trend detection, virality prediction, content opportunities, and timing.",
+    description: "Spots rising topics early and suggests when the brand should join the conversation.",
     score: 81,
     status: "growth",
     signalCount: 388,
@@ -161,7 +161,7 @@ export const radarModules: RadarModule[] = [
     id: "authority",
     name: "Authority",
     shortName: "Authority",
-    description: "Backlinks, PR, entity trust, media mentions, and knowledge graph readiness.",
+    description: "Measures whether trusted websites, media, and partners are strengthening the brand.",
     score: 70,
     status: "watch",
     signalCount: 724,
@@ -174,7 +174,7 @@ export const radarModules: RadarModule[] = [
     id: "competitor",
     name: "Competitors",
     shortName: "Competitor",
-    description: "Competitor visibility, campaigns, reviews, AI mentions, and backlinks.",
+    description: "Shows where competitors are winning attention and what the brand can do next.",
     score: 74,
     status: "watch",
     signalCount: 640,
@@ -187,78 +187,78 @@ export const radarModules: RadarModule[] = [
     id: "funnel",
     name: "Funnel Intelligence",
     shortName: "Funnel",
-    description: "TOFU/MOFU/BOFU mapping, revenue prediction, lead intent, and ROI forecasts.",
+    description: "Connects visibility work to leads, sales opportunities, and likely business impact.",
     score: 86,
     status: "growth",
     signalCount: 204,
     change: "+10.2%",
     accent: "#20a66a",
     owner: "Revenue",
-    kpis: ["BOFU gaps", "Lead intent", "Predicted pipeline"]
+    kpis: ["Buyer gaps", "Lead intent", "Sales opportunity"]
   }
 ];
 
 export const nextActions: RadarAction[] = [
   {
-    title: "Create BOFU comparison page for high-intent competitor query",
+    title: "Create a comparison page for buyers choosing between brands",
     module: "Funnel Intelligence",
     impact: "High",
     risk: "Low",
     automation: "Draft",
-    evidence: "Competitor owns 6 of 10 purchase-intent prompts and ranks in AI answers."
+    evidence: "Competitors are appearing when buyers ask AI tools which brand to choose."
   },
   {
-    title: "Add Organization, Product, FAQ, and Review schema to priority pages",
+    title: "Make key pages easier for Google and AI tools to understand",
     module: "Search",
     impact: "High",
     risk: "Low",
     automation: "Approval",
-    evidence: "Structured data coverage is missing on 42% of commercial pages."
+    evidence: "Important product and service pages are missing machine-readable business details."
   },
   {
-    title: "Escalate three negative reviews mentioning fulfillment delays",
+    title: "Escalate three negative reviews about delivery delays",
     module: "Reviews",
     impact: "Medium",
     risk: "Medium",
     automation: "Draft",
-    evidence: "Same issue repeated across two regions in the last 36 hours."
+    evidence: "The same complaint appeared in two regions during the last 36 hours."
   },
   {
-    title: "Brief creator shortlist for upcoming category trend",
+    title: "Prepare a creator shortlist for a rising topic",
     module: "Influencers",
     impact: "Medium",
     risk: "Low",
     automation: "Draft",
-    evidence: "Trend momentum is up 31% and audience overlap is strongest on short video."
+    evidence: "The topic is growing quickly and short video audiences match the brand best."
   }
 ];
 
 export const activityEvents: RadarEvent[] = [
   {
     time: "09:40",
-    title: "AI mention detected",
-    detail: "Brand appeared in 4 of 12 tracked ChatGPT-style comparison prompts.",
+    title: "Brand appeared in AI answers",
+    detail: "The brand showed up in 4 of 12 tracked buyer questions.",
     module: "AI Visibility",
     tone: "growth"
   },
   {
     time: "09:18",
-    title: "Review risk opened",
-    detail: "A low-rating review triggered escalation because it mentioned safety and refund terms.",
+    title: "Sensitive review needs attention",
+    detail: "A low-rating review was flagged because it mentioned safety and refund concerns.",
     module: "Reviews",
     tone: "risk"
   },
   {
     time: "08:52",
-    title: "SERP movement",
-    detail: "Priority service page moved from position 11 to 7 for a BOFU keyword cluster.",
+    title: "Google ranking improved",
+    detail: "A key service page moved from position 11 to 7 for a buyer-focused search.",
     module: "Search",
     tone: "growth"
   },
   {
     time: "08:27",
-    title: "Trend opportunity",
-    detail: "A category topic crossed the virality threshold for LinkedIn and YouTube Shorts.",
+    title: "New content opportunity",
+    detail: "A rising topic is now strong enough to consider for LinkedIn and YouTube Shorts.",
     module: "Trends",
     tone: "watch"
   }
@@ -266,14 +266,14 @@ export const activityEvents: RadarEvent[] = [
 
 export const approvals: ApprovalItem[] = [
   {
-    title: "Publish 5-star Google review reply batch",
+    title: "Publish replies to positive Google reviews",
     module: "Reviews",
     risk: "Low",
     owner: "CX Lead",
     eta: "Today"
   },
   {
-    title: "Approve schema changes for enterprise pages",
+    title: "Approve search-friendly page details",
     module: "Search",
     risk: "Low",
     owner: "SEO Lead",
