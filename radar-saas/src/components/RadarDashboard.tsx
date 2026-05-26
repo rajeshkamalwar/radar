@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   alpha,
   Avatar,
@@ -1107,66 +1107,592 @@ export function RadarWorkspace({ workspaceId }: { workspaceId: WorkspaceId }) {
   );
 }
 
-function ApprovalBoard() {
-  const columns = [
-    {
-      title: "Detected",
-      color: "#00bad1",
-      cards: ["New review pattern found", "Competitor gained AI mention"]
-    },
-    {
-      title: "Drafted",
-      color: "#7367f0",
-      cards: ["Positive review replies", "Search-friendly page details"]
-    },
-    {
-      title: "Needs Approval",
-      color: "#ff9f43",
-      cards: approvals.map((approval) => approval.title)
-    },
-    {
-      title: "Published",
-      color: "#28c76f",
-      cards: ["Updated local service details", "Replied to two safe reviews"]
-    }
+type ApprovalStatus = "Found" | "Drafted" | "Needs Approval" | "Approved" | "Published";
+
+type ApprovalWorkflowItem = {
+  id: string;
+  status: ApprovalStatus;
+  title: string;
+  module: string;
+  channel: string;
+  risk: "High" | "Medium" | "Low";
+  owner: string;
+  due: string;
+  impact: string;
+  summary: string;
+  aiDraft: string;
+  evidence: string[];
+  change: string;
+  clientDecision: string;
+  nextStep: string;
+  timeline: Array<{ time: string; label: string; detail: string }>;
+};
+
+const approvalWorkflowItems: ApprovalWorkflowItem[] = [
+  {
+    id: "sensitive-review",
+    status: "Needs Approval",
+    title: "Sensitive review response",
+    module: "Reputation",
+    channel: "Google reviews",
+    risk: "High",
+    owner: "Comms",
+    due: "2 hours",
+    impact: "Protects trust before the concern spreads.",
+    summary:
+      "A low-rating review mentions safety, refund, and delivery concerns. The system drafted a calm response, but it should not publish without a human check.",
+    aiDraft:
+      "Acknowledge the customer concern, move the refund conversation to a private support channel, and ask the operations lead to verify the delivery record before any public promise.",
+    evidence: [
+      "Same concern appeared in two regions during the last 36 hours.",
+      "Review includes refund language, which makes the reply higher risk.",
+      "No matching support ticket has been linked yet."
+    ],
+    change: "Draft reply is ready, but publishing is locked until Comms approves it.",
+    clientDecision: "Approve reply, request edits, or assign to support leadership.",
+    nextStep: "Comms should review the exact wording before the customer response goes live.",
+    timeline: [
+      { time: "09:18", label: "Risk found", detail: "Review matched sensitive language rules." },
+      { time: "09:22", label: "AI drafted", detail: "Reply created with refund-safe wording." },
+      { time: "09:27", label: "Waiting", detail: "Human approval required before publishing." }
+    ]
+  },
+  {
+    id: "search-page-details",
+    status: "Needs Approval",
+    title: "Search-friendly page details",
+    module: "Search",
+    channel: "Website pages",
+    risk: "Low",
+    owner: "SEO Lead",
+    due: "Today",
+    impact: "Makes important pages easier for Google and AI tools to understand.",
+    summary:
+      "Important service pages are missing clear business details. The system prepared structured page improvements for the highest-value pages first.",
+    aiDraft:
+      "Add plain service descriptions, location coverage, FAQ answers, and business details to the pages that already attract qualified visitors.",
+    evidence: [
+      "Three priority pages are getting impressions but weak clicks.",
+      "AI answers are citing competitors with clearer service explanations.",
+      "Business details can be added without changing the visual design."
+    ],
+    change: "Page details are drafted and ready for SEO approval.",
+    clientDecision: "Approve the update or request wording changes from the content owner.",
+    nextStep: "Approve the safe page details, then schedule the next scan.",
+    timeline: [
+      { time: "08:52", label: "Ranking movement", detail: "A priority page moved from position 11 to 7." },
+      { time: "09:04", label: "Gap detected", detail: "Missing business details were found on buyer pages." },
+      { time: "09:16", label: "Draft ready", detail: "Page updates prepared for review." }
+    ]
+  },
+  {
+    id: "positive-review-replies",
+    status: "Drafted",
+    title: "Positive review replies",
+    module: "Reviews",
+    channel: "Google Business Profile",
+    risk: "Low",
+    owner: "CX Lead",
+    due: "Today",
+    impact: "Improves response rate without creating brand risk.",
+    summary:
+      "Several positive reviews can receive safe thank-you replies. These are low-risk drafts, but the client can still review tone before publishing.",
+    aiDraft:
+      "Thank each customer by theme, mention the relevant location or service, and invite them back without adding promotional claims.",
+    evidence: [
+      "Six positive reviews arrived since the last scan.",
+      "No sensitive words or complaints were found.",
+      "Replies follow the brand tone rules already approved."
+    ],
+    change: "Replies are drafted and grouped for one-click approval.",
+    clientDecision: "Approve all safe replies or open the drafts for tone edits.",
+    nextStep: "CX can approve the reply batch today.",
+    timeline: [
+      { time: "10:08", label: "Reviews found", detail: "Positive reviews grouped by location." },
+      { time: "10:12", label: "Drafted", detail: "Safe replies created using brand tone rules." },
+      { time: "10:14", label: "Queued", detail: "Batch is ready for CX review." }
+    ]
+  },
+  {
+    id: "ai-competitor-mention",
+    status: "Found",
+    title: "Competitor gained an AI mention",
+    module: "AI Visibility",
+    channel: "AI answers",
+    risk: "Medium",
+    owner: "GEO",
+    due: "Tomorrow",
+    impact: "Protects the brand when buyers ask AI tools who to choose.",
+    summary:
+      "A competitor appeared in buyer comparison answers where the brand was missing. The system found the source pattern behind the answer.",
+    aiDraft:
+      "Create a buyer comparison page and add clearer proof points to existing service pages so AI tools have trustworthy references to cite.",
+    evidence: [
+      "The competitor was mentioned in 5 of 12 tracked buyer questions.",
+      "AI answers cited comparison content and review summaries.",
+      "The brand has proof points, but they are scattered across pages."
+    ],
+    change: "Recommendation is ready, but content has not been drafted yet.",
+    clientDecision: "Approve a content brief or assign strategy review.",
+    nextStep: "GEO team should approve the comparison-page brief.",
+    timeline: [
+      { time: "09:40", label: "AI scan complete", detail: "Tracked buyer questions were checked." },
+      { time: "09:45", label: "Gap found", detail: "Competitor appeared more often in choice questions." },
+      { time: "09:51", label: "Recommendation", detail: "Comparison-page opportunity added to the queue." }
+    ]
+  },
+  {
+    id: "creator-shortlist",
+    status: "Drafted",
+    title: "Influencer shortlist",
+    module: "Influencers",
+    channel: "Creator campaigns",
+    risk: "Medium",
+    owner: "Partnerships",
+    due: "Tomorrow",
+    impact: "Turns a rising topic into a safer creator campaign.",
+    summary:
+      "The system found creators who match the audience for a rising topic, then filtered out accounts with brand-safety concerns.",
+    aiDraft:
+      "Shortlist eight creators, prioritize three with strong audience fit, and ask Partnerships to review past posts before outreach.",
+    evidence: [
+      "Topic momentum is up 15.4% in the current scan.",
+      "Short-form video audiences match the campaign goal.",
+      "Two creators were removed because recent posts conflicted with brand rules."
+    ],
+    change: "Creator shortlist is drafted, with brand-safety notes attached.",
+    clientDecision: "Approve outreach shortlist or request a stricter brand-safety filter.",
+    nextStep: "Partnerships should review the top three creators.",
+    timeline: [
+      { time: "08:27", label: "Trend found", detail: "Rising topic crossed campaign threshold." },
+      { time: "08:44", label: "Creators matched", detail: "Audience fit and safety checks completed." },
+      { time: "09:05", label: "Draft ready", detail: "Shortlist sent for partnership review." }
+    ]
+  },
+  {
+    id: "local-service-details",
+    status: "Published",
+    title: "Local service details updated",
+    module: "Local Presence",
+    channel: "Google Business Profile",
+    risk: "Low",
+    owner: "Local",
+    due: "Done",
+    impact: "Helps nearby customers find accurate services and contact details.",
+    summary:
+      "Approved service details were published to priority locations. The system will rescan listings and report any mismatches.",
+    aiDraft:
+      "Published service names, location coverage, and customer action details exactly as approved by the Local team.",
+    evidence: [
+      "Priority locations were missing service details.",
+      "Published details match the approved source of truth.",
+      "Next scan is scheduled to confirm listing consistency."
+    ],
+    change: "Approved updates are live.",
+    clientDecision: "No action needed unless the next scan finds mismatches.",
+    nextStep: "Watch the next local scan for listing consistency.",
+    timeline: [
+      { time: "Yesterday", label: "Approved", detail: "Local team approved the listing update." },
+      { time: "08:10", label: "Published", detail: "Service details sent to priority locations." },
+      { time: "08:18", label: "Monitoring", detail: "Next scan scheduled to confirm live listings." }
+    ]
+  }
+];
+
+const approvalStatusTone: Record<ApprovalStatus, { color: string; text: string }> = {
+  Found: { color: "#00bad1", text: "New finding" },
+  Drafted: { color: "#7367f0", text: "AI drafted" },
+  "Needs Approval": { color: "#ff9f43", text: "Needs approval" },
+  Approved: { color: "#28c76f", text: "Approved" },
+  Published: { color: "#28c76f", text: "Published" }
+};
+
+const approvalFilters: Array<"All" | ApprovalStatus> = ["All", "Found", "Drafted", "Needs Approval", "Published"];
+
+const riskChipColor: Record<ApprovalWorkflowItem["risk"], "success" | "warning" | "error"> = {
+  High: "error",
+  Medium: "warning",
+  Low: "success"
+};
+
+function ApprovalSummaryStrip() {
+  const summary = [
+    { label: "Needs approval", value: approvalWorkflowItems.filter((item) => item.status === "Needs Approval").length, color: "#ff9f43" },
+    { label: "AI drafts", value: approvalWorkflowItems.filter((item) => item.status === "Drafted").length, color: "#7367f0" },
+    { label: "New findings", value: approvalWorkflowItems.filter((item) => item.status === "Found").length, color: "#00bad1" },
+    { label: "Published", value: approvalWorkflowItems.filter((item) => item.status === "Published").length, color: "#28c76f" }
   ];
 
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "repeat(2, minmax(0, 1fr))", xl: "repeat(4, minmax(0, 1fr))" },
-        gap: 3
+        gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+        gap: 2,
+        mb: 3
       }}
     >
-      {columns.map((column) => (
-        <Card key={column.title}>
+      {summary.map((item) => (
+        <Card key={item.label}>
           <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-            <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-              <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: column.color }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
-                  {column.title}
+            <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+                  {item.label}
                 </Typography>
-              </Stack>
-              <Chip label={column.cards.length} size="small" />
-            </Stack>
-            <Stack spacing={1.5}>
-              {column.cards.map((card) => (
-                <Paper key={card} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                    {card}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
-                    Review evidence, owner, and risk before publishing.
-                  </Typography>
-                </Paper>
-              ))}
+                <Typography variant="h4" sx={{ mt: 0.75 }}>
+                  {item.value}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 2,
+                  color: item.color,
+                  bgcolor: alpha(item.color, 0.12),
+                  flexShrink: 0
+                }}
+              >
+                <FileCheck2 size={20} />
+              </Box>
             </Stack>
           </CardContent>
         </Card>
       ))}
     </Box>
+  );
+}
+
+function ApprovalFilterBar({
+  activeFilter,
+  onChange
+}: {
+  activeFilter: "All" | ApprovalStatus;
+  onChange: (filter: "All" | ApprovalStatus) => void;
+}) {
+  return (
+    <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+      {approvalFilters.map((filter) => {
+        const selected = activeFilter === filter;
+        const count = filter === "All" ? approvalWorkflowItems.length : approvalWorkflowItems.filter((item) => item.status === filter).length;
+
+        return (
+          <Button
+            key={filter}
+            size="small"
+            variant={selected ? "contained" : "outlined"}
+            onClick={() => onChange(filter)}
+            sx={{ minWidth: 0 }}
+          >
+            {filter} {count}
+          </Button>
+        );
+      })}
+    </Stack>
+  );
+}
+
+function ApprovalInboxList({
+  items,
+  selectedId,
+  onSelect
+}: {
+  items: ApprovalWorkflowItem[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <Card>
+      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ p: 3, alignItems: { xs: "stretch", sm: "center" }, justifyContent: "space-between" }}
+        >
+          <Box>
+            <Typography variant="h6">Review Inbox</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Every item shows the finding, draft, owner, risk, and next decision.
+            </Typography>
+          </Box>
+          <Chip label={`${items.length} visible`} color="primary" variant="outlined" />
+        </Stack>
+        <Divider />
+        <Stack spacing={0} sx={{ maxHeight: { lg: 720 }, overflowY: "auto" }}>
+          {items.map((item) => {
+            const selected = selectedId === item.id;
+            const statusTone = approvalStatusTone[item.status];
+
+            return (
+              <Box
+                key={item.id}
+                component="button"
+                type="button"
+                onClick={() => onSelect(item.id)}
+                sx={{
+                  width: "100%",
+                  p: 0,
+                  border: 0,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  bgcolor: selected ? alpha(statusTone.color, 0.08) : "transparent",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  "&:hover": { bgcolor: alpha(statusTone.color, 0.06) }
+                }}
+              >
+                <Box sx={{ p: 2.25 }}>
+                  <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ justifyContent: "space-between" }}>
+                    <Stack direction="row" spacing={1.5} sx={{ minWidth: 0 }}>
+                      <Box
+                        sx={{
+                          width: 42,
+                          height: 42,
+                          display: "grid",
+                          placeItems: "center",
+                          borderRadius: 2,
+                          color: statusTone.color,
+                          bgcolor: alpha(statusTone.color, 0.12),
+                          flexShrink: 0
+                        }}
+                      >
+                        {item.status === "Found" ? <AlertTriangle size={20} /> : <FileCheck2 size={20} />}
+                      </Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 900, overflowWrap: "anywhere" }}>
+                          {item.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.35 }}>
+                          {item.module} - {item.channel}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1, alignItems: "flex-start" }}>
+                      <Chip label={statusTone.text} size="small" variant="outlined" sx={{ borderColor: statusTone.color, color: statusTone.color }} />
+                      <Chip label={`${item.risk} risk`} size="small" color={riskChipColor[item.risk]} />
+                    </Stack>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, overflowWrap: "anywhere" }}>
+                    {item.summary}
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1.5, flexWrap: "wrap", gap: 1 }}>
+                    <Chip label={`Owner: ${item.owner}`} size="small" variant="outlined" />
+                    <Chip label={`Due: ${item.due}`} size="small" variant="outlined" />
+                    <Chip label={item.impact} size="small" variant="outlined" />
+                  </Stack>
+                </Box>
+              </Box>
+            );
+          })}
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ApprovalDetailPanel({ item }: { item: ApprovalWorkflowItem }) {
+  const statusTone = approvalStatusTone[item.status];
+
+  return (
+    <Stack spacing={3}>
+      <Card>
+        <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}>
+            <Chip label={statusTone.text} size="small" sx={{ color: statusTone.color, borderColor: statusTone.color }} variant="outlined" />
+            <Chip label={`${item.risk} risk`} size="small" color={riskChipColor[item.risk]} />
+            <Chip label={item.module} size="small" variant="outlined" />
+          </Stack>
+
+          <Typography variant="h5" sx={{ overflowWrap: "anywhere" }}>
+            {item.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {item.summary}
+          </Typography>
+
+          <Box
+            sx={{
+              mt: 2.5,
+              display: "grid",
+              gridTemplateColumns: { xs: "minmax(0, 1fr)", sm: "repeat(2, minmax(0, 1fr))" },
+              gap: 1.5
+            }}
+          >
+            {[
+              ["Owner", item.owner],
+              ["Due", item.due],
+              ["Channel", item.channel],
+              ["Impact", item.impact]
+            ].map(([label, value]) => (
+              <Paper key={label} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+                  {label}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.25, fontWeight: 800, overflowWrap: "anywhere" }}>
+                  {value}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+
+          <Paper
+            variant="outlined"
+            sx={{
+              mt: 2.5,
+              p: 2,
+              borderRadius: 2,
+              bgcolor: alpha(statusTone.color, 0.05),
+              borderColor: alpha(statusTone.color, 0.2)
+            }}
+          >
+            <Typography variant="subtitle2">AI recommendation</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+              {item.aiDraft}
+            </Typography>
+          </Paper>
+
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: 2.5 }}>
+            <Button variant="contained" startIcon={<CheckCircle2 size={17} />}>
+              Approve
+            </Button>
+            <Button variant="outlined" startIcon={<MessageSquareReply size={17} />}>
+              Request edits
+            </Button>
+            <Button variant="outlined" startIcon={<Users size={17} />}>
+              Assign owner
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+          <Typography variant="h6">Evidence</Typography>
+          <Stack spacing={1.25} sx={{ mt: 2 }}>
+            {item.evidence.map((point) => (
+              <Stack key={point} direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
+                <CheckCircle2 size={17} color="#28c76f" style={{ marginTop: 2, flexShrink: 0 }} />
+                <Typography variant="body2" color="text.secondary">
+                  {point}
+                </Typography>
+              </Stack>
+            ))}
+          </Stack>
+          <Divider sx={{ my: 2.5 }} />
+          <Typography variant="subtitle2">What changed</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+            {item.change}
+          </Typography>
+          <Typography variant="subtitle2" sx={{ mt: 2 }}>
+            What the client decides
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+            {item.clientDecision}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Stack>
+  );
+}
+
+function ApprovalActivityTrail({ item }: { item: ApprovalWorkflowItem }) {
+  return (
+    <Card>
+      <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+          <Box>
+            <Typography variant="h6">Activity Trail</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Plain-language audit history for the selected item.
+            </Typography>
+          </Box>
+          <Chip label={item.nextStep} size="small" color="primary" variant="outlined" sx={{ display: { xs: "none", md: "inline-flex" } }} />
+        </Stack>
+        <Stack spacing={2}>
+          {item.timeline.map((event, index) => (
+            <Stack key={`${event.time}-${event.label}`} direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: "50%",
+                  color: index === item.timeline.length - 1 ? "primary.main" : "success.main",
+                  bgcolor: alpha(index === item.timeline.length - 1 ? "#7367f0" : "#28c76f", 0.12),
+                  flexShrink: 0
+                }}
+              >
+                <Activity size={15} />
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                  {event.label}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  {event.time} - {event.detail}
+                </Typography>
+              </Box>
+            </Stack>
+          ))}
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ApprovalWorkflow() {
+  const [activeFilter, setActiveFilter] = useState<"All" | ApprovalStatus>("All");
+  const [selectedId, setSelectedId] = useState(approvalWorkflowItems[0].id);
+
+  const filteredItems = useMemo(
+    () =>
+      activeFilter === "All"
+        ? approvalWorkflowItems
+        : approvalWorkflowItems.filter((item) => item.status === activeFilter),
+    [activeFilter]
+  );
+  const selectedItem =
+    filteredItems.find((item) => item.id === selectedId) ?? filteredItems[0] ?? approvalWorkflowItems[0];
+
+  return (
+    <Stack spacing={3}>
+      <ApprovalSummaryStrip />
+      <Card>
+        <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
+          <Stack
+            direction={{ xs: "column", lg: "row" }}
+            spacing={2}
+            sx={{ alignItems: { xs: "stretch", lg: "center" }, justifyContent: "space-between" }}
+          >
+            <Box>
+              <Typography variant="h6">Client Visibility Layer</Typography>
+              <Typography variant="body2" color="text.secondary">
+                A live view of what was found, what AI drafted, and what still needs a human decision.
+              </Typography>
+            </Box>
+            <ApprovalFilterBar activeFilter={activeFilter} onChange={setActiveFilter} />
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 0.95fr) minmax(420px, 0.75fr)" },
+          gap: 3,
+          alignItems: "start"
+        }}
+      >
+        <ApprovalInboxList items={filteredItems} selectedId={selectedItem.id} onSelect={setSelectedId} />
+        <ApprovalDetailPanel item={selectedItem} />
+      </Box>
+
+      <ApprovalActivityTrail item={selectedItem} />
+    </Stack>
   );
 }
 
@@ -1180,16 +1706,16 @@ export function RadarApprovalsPage() {
           sx={{ mb: 3, alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between" }}
         >
           <Box>
-            <Typography variant="h4">Approval Board</Typography>
+            <Typography variant="h4">Approval Inbox</Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-              Review changes before they affect public pages, reviews, or campaigns.
+              See what the system found, what AI prepared, and what needs a human decision before anything goes live.
             </Typography>
           </Box>
           <Button variant="contained" startIcon={<CheckCircle2 size={17} />}>
-            Review approvals
+            Review waiting items
           </Button>
         </Stack>
-        <ApprovalBoard />
+        <ApprovalWorkflow />
       </Box>
     </RadarShell>
   );
