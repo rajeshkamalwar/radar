@@ -42,7 +42,7 @@ export type ApprovalItem = {
 export const radarModules: RadarModule[] = [
   {
     id: "executive",
-    name: "Executive RADAR",
+    name: "Executive Command",
     shortName: "Executive",
     description: "Board-level command view for risk, growth, proof, and pending decisions.",
     score: 91,
@@ -55,7 +55,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "search",
-    name: "Search RADAR",
+    name: "Search",
     shortName: "Search",
     description: "SEO, Google positioning, SERP features, backlinks, and technical health.",
     score: 84,
@@ -68,7 +68,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "ai",
-    name: "AI RADAR",
+    name: "AI Visibility",
     shortName: "AI",
     description: "ChatGPT, Google AI, Gemini, Perplexity, citations, and answer accuracy.",
     score: 72,
@@ -81,7 +81,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "reputation",
-    name: "Reputation RADAR",
+    name: "Reputation",
     shortName: "Reputation",
     description: "ORM, public sentiment, crisis signals, negative results, and misinformation.",
     score: 68,
@@ -94,7 +94,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "reviews",
-    name: "Review RADAR",
+    name: "Reviews",
     shortName: "Reviews",
     description: "Real-time reviews, auto-reply drafts, escalation, and rating intelligence.",
     score: 79,
@@ -107,7 +107,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "local",
-    name: "Local RADAR",
+    name: "Local Presence",
     shortName: "Local",
     description: "Google Business Profile, map pack visibility, NAP, and locations.",
     score: 88,
@@ -120,7 +120,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "social",
-    name: "Social RADAR",
+    name: "Social",
     shortName: "Social",
     description: "Social listening, engagement, SMM workflows, comments, and share of voice.",
     score: 76,
@@ -133,7 +133,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "influencer",
-    name: "Influencer RADAR",
+    name: "Influencers",
     shortName: "Influencer",
     description: "Creator discovery, audience fit, brand safety, UGC, and campaign prediction.",
     score: 63,
@@ -146,7 +146,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "trend",
-    name: "Trend RADAR",
+    name: "Trends",
     shortName: "Trends",
     description: "Trend detection, virality prediction, content opportunities, and timing.",
     score: 81,
@@ -159,7 +159,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "authority",
-    name: "Authority RADAR",
+    name: "Authority",
     shortName: "Authority",
     description: "Backlinks, PR, entity trust, media mentions, and knowledge graph readiness.",
     score: 70,
@@ -172,7 +172,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "competitor",
-    name: "Competitor RADAR",
+    name: "Competitors",
     shortName: "Competitor",
     description: "Competitor visibility, campaigns, reviews, AI mentions, and backlinks.",
     score: 74,
@@ -185,7 +185,7 @@ export const radarModules: RadarModule[] = [
   },
   {
     id: "funnel",
-    name: "Funnel RADAR",
+    name: "Funnel Intelligence",
     shortName: "Funnel",
     description: "TOFU/MOFU/BOFU mapping, revenue prediction, lead intent, and ROI forecasts.",
     score: 86,
@@ -201,7 +201,7 @@ export const radarModules: RadarModule[] = [
 export const nextActions: RadarAction[] = [
   {
     title: "Create BOFU comparison page for high-intent competitor query",
-    module: "Funnel RADAR",
+    module: "Funnel Intelligence",
     impact: "High",
     risk: "Low",
     automation: "Draft",
@@ -209,7 +209,7 @@ export const nextActions: RadarAction[] = [
   },
   {
     title: "Add Organization, Product, FAQ, and Review schema to priority pages",
-    module: "Search RADAR",
+    module: "Search",
     impact: "High",
     risk: "Low",
     automation: "Approval",
@@ -217,7 +217,7 @@ export const nextActions: RadarAction[] = [
   },
   {
     title: "Escalate three negative reviews mentioning fulfillment delays",
-    module: "Review RADAR",
+    module: "Reviews",
     impact: "Medium",
     risk: "Medium",
     automation: "Draft",
@@ -225,7 +225,7 @@ export const nextActions: RadarAction[] = [
   },
   {
     title: "Brief creator shortlist for upcoming category trend",
-    module: "Influencer RADAR",
+    module: "Influencers",
     impact: "Medium",
     risk: "Low",
     automation: "Draft",
@@ -238,28 +238,28 @@ export const activityEvents: RadarEvent[] = [
     time: "09:40",
     title: "AI mention detected",
     detail: "Brand appeared in 4 of 12 tracked ChatGPT-style comparison prompts.",
-    module: "AI RADAR",
+    module: "AI Visibility",
     tone: "growth"
   },
   {
     time: "09:18",
     title: "Review risk opened",
     detail: "A low-rating review triggered escalation because it mentioned safety and refund terms.",
-    module: "Review RADAR",
+    module: "Reviews",
     tone: "risk"
   },
   {
     time: "08:52",
     title: "SERP movement",
     detail: "Priority service page moved from position 11 to 7 for a BOFU keyword cluster.",
-    module: "Search RADAR",
+    module: "Search",
     tone: "growth"
   },
   {
     time: "08:27",
     title: "Trend opportunity",
     detail: "A category topic crossed the virality threshold for LinkedIn and YouTube Shorts.",
-    module: "Trend RADAR",
+    module: "Trends",
     tone: "watch"
   }
 ];
@@ -267,28 +267,28 @@ export const activityEvents: RadarEvent[] = [
 export const approvals: ApprovalItem[] = [
   {
     title: "Publish 5-star Google review reply batch",
-    module: "Review RADAR",
+    module: "Reviews",
     risk: "Low",
     owner: "CX Lead",
     eta: "Today"
   },
   {
     title: "Approve schema changes for enterprise pages",
-    module: "Search RADAR",
+    module: "Search",
     risk: "Low",
     owner: "SEO Lead",
     eta: "Today"
   },
   {
     title: "Review response to negative press mention",
-    module: "Reputation RADAR",
+    module: "Reputation",
     risk: "High",
     owner: "Comms",
     eta: "2h"
   },
   {
     title: "Approve influencer shortlist",
-    module: "Influencer RADAR",
+    module: "Influencers",
     risk: "Medium",
     owner: "Partnerships",
     eta: "Tomorrow"

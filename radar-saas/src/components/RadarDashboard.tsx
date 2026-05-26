@@ -269,7 +269,7 @@ function ModuleCard({ module }: { module: RadarModule }) {
               {module.score}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              RADAR score
+              Health score
             </Typography>
           </Box>
           <Box sx={{ textAlign: "right" }}>
@@ -462,7 +462,7 @@ function WorkLedger() {
           <Box>
             <Typography variant="h6">Work Ledger</Typography>
             <Typography variant="body2" color="text.secondary">
-              What RADAR changed, detected, and escalated
+              What changed, what was detected, and what was escalated
             </Typography>
           </Box>
           <AlertTriangle size={20} />
@@ -526,7 +526,7 @@ function TopBar() {
       <Stack direction="row" spacing={1.25} sx={{ flexGrow: 1, minWidth: 0, alignItems: "center" }}>
         <Search size={19} />
         <Typography variant="body2" color="text.secondary" noWrap>
-          Search brands, signals, competitors, approvals, and RADAR modules
+          Search brands, signals, competitors, approvals, and intelligence centers
         </Typography>
       </Stack>
       <Stack direction="row" spacing={1}>
@@ -562,7 +562,7 @@ export function RadarDashboard() {
               sx={{ mb: 3, alignItems: { xs: "stretch", md: "center" }, justifyContent: "space-between" }}
             >
               <Box>
-                <Typography variant="h4">RADAR Command Center</Typography>
+                <Typography variant="h4">Command Center</Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
                   Reputation, Authority, Discovery, Analytics & Response across every public brand signal.
                 </Typography>
@@ -589,14 +589,14 @@ export function RadarDashboard() {
                 color="#7367f0"
               />
               <MetricCard
-                title="Growth RADARs"
+                title="Growth Centers"
                 value={`${growthItems}`}
                 change="Signals compounding"
                 icon={<TrendingUp size={24} />}
                 color="#28c76f"
               />
               <MetricCard
-                title="Watch RADARs"
+                title="Watch Centers"
                 value={`${watchItems}`}
                 change="Needs monitoring"
                 icon={<Activity size={24} />}
@@ -625,7 +625,7 @@ export function RadarDashboard() {
                     <Box>
                       <Typography variant="h6">Specialist Intelligence Centers</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Each RADAR owns its own score, signals, workflow, and response authority.
+                        Each center owns its score, signals, workflow, and response authority.
                       </Typography>
                     </Box>
                     <Chip label="12 centers" color="primary" variant="outlined" />
