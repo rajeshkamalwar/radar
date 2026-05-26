@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   alpha,
   Avatar,
@@ -108,6 +108,85 @@ const priorityTone: Record<
 };
 
 const quickFilters = ["All", "Needs attention", "Ready to approve", "Growth", "Risks"];
+
+const liveSignalEvents: Array<{
+  title: string;
+  detail: string;
+  module: string;
+  tone: RadarStatus;
+  source: string;
+}> = [
+  {
+    title: "New Google review detected",
+    detail: "A 2-star review mentions refund timing and needs approval before reply.",
+    module: "Reviews",
+    tone: "risk",
+    source: "Google Business Profile"
+  },
+  {
+    title: "AI answer changed",
+    detail: "The brand now appears in 5 of 12 tracked buyer questions.",
+    module: "AI Visibility",
+    tone: "growth",
+    source: "AI prompt monitor"
+  },
+  {
+    title: "Ranking movement found",
+    detail: "A priority service page moved into the first-page watch zone.",
+    module: "Search",
+    tone: "growth",
+    source: "Search scan"
+  },
+  {
+    title: "Creator risk cleared",
+    detail: "Two creators passed brand-safety checks for the rising topic.",
+    module: "Influencers",
+    tone: "clear",
+    source: "Creator monitor"
+  },
+  {
+    title: "Competitor mention increased",
+    detail: "A competitor appeared again in comparison-style AI answers.",
+    module: "Competitors",
+    tone: "watch",
+    source: "Share of voice"
+  }
+];
+
+const liveSignalChecks = [
+  "AI prompts",
+  "Reviews",
+  "Google positions",
+  "Local listings",
+  "Social mentions",
+  "Backlinks"
+];
+
+function useLiveSignals() {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setTick((current) => current + 1), 3500);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  return useMemo(() => {
+    const activeEvent = liveSignalEvents[tick % liveSignalEvents.length];
+    const scanProgress = 42 + ((tick * 13) % 54);
+    const checksCompleted = 1284 + tick * 11;
+    const queueDelta = tick % 3 === 0 ? 1 : 0;
+    const signalLabel = liveSignalChecks[tick % liveSignalChecks.length];
+
+    return {
+      activeEvent,
+      checksCompleted,
+      queueDelta,
+      scanProgress,
+      signalLabel,
+      lastUpdated: tick === 0 ? "Starting live scan" : `Updated ${Math.min(tick * 4, 60)}s ago`
+    };
+  }, [tick]);
+}
 
 const workspaceRoutes = {
   executive: "/",
@@ -317,6 +396,185 @@ function MetricCard({
             {icon}
           </Box>
         </Stack>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PulseDot({ color = "#28c76f" }: { color?: string }) {
+  return (
+    <Box
+      sx={{
+        width: 9,
+        height: 9,
+        borderRadius: "50%",
+        bgcolor: color,
+        boxShadow: `0 0 0 6px ${alpha(color, 0.14)}`,
+        animation: "radarPulse 1.8s ease-in-out infinite",
+        "@keyframes radarPulse": {
+          "0%": { transform: "scale(0.92)", boxShadow: `0 0 0 0 ${alpha(color, 0.28)}` },
+          "70%": { transform: "scale(1)", boxShadow: `0 0 0 8px ${alpha(color, 0)}` },
+          "100%": { transform: "scale(0.92)", boxShadow: `0 0 0 0 ${alpha(color, 0)}` }
+        }
+      }}
+    />
+  );
+}
+
+function RealtimeTopStatus() {
+  const live = useLiveSignals();
+
+  return (
+    <Tooltip title={`${live.lastUpdated}. Currently checking ${live.signalLabel}.`}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{
+          display: { xs: "none", md: "flex" },
+          alignItems: "center",
+          px: 1.5,
+          py: 0.8,
+          borderRadius: 2,
+          border: 1,
+          borderColor: "divider",
+          bgcolor: alpha("#28c76f", 0.08)
+        }}
+      >
+        <PulseDot />
+        <Typography variant="caption" sx={{ fontWeight: 900 }}>
+          Live
+        </Typography>
+        <Typography variant="caption" color="text.secondary" noWrap>
+          {live.signalLabel}
+        </Typography>
+      </Stack>
+    </Tooltip>
+  );
+}
+
+function LiveSignalStrip() {
+  const live = useLiveSignals();
+  const tone = statusTone[live.activeEvent.tone];
+
+  const cards = [
+    {
+      label: "Latest signal",
+      value: live.activeEvent.title,
+      detail: live.activeEvent.detail,
+      icon: <Activity size={20} />,
+      color: live.activeEvent.tone === "risk" ? "#ea5455" : "#28c76f"
+    },
+    {
+      label: "Client queue",
+      value: `${approvals.length + live.queueDelta} items`,
+      detail: "Waiting for review, edits, or approval",
+      icon: <FileCheck2 size={20} />,
+      color: "#ff9f43"
+    },
+    {
+      label: "Checks completed",
+      value: live.checksCompleted.toLocaleString(),
+      detail: live.lastUpdated,
+      icon: <CheckCircle2 size={20} />,
+      color: "#00bad1"
+    }
+  ];
+
+  return (
+    <Card>
+      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+        <Box
+          sx={{
+            p: 3,
+            display: "grid",
+            gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "1.05fr repeat(3, minmax(0, 1fr))" },
+            gap: 2,
+            alignItems: "stretch"
+          }}
+        >
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: 2,
+              color: "primary.contrastText",
+              background: "linear-gradient(135deg, #28c76f, #00bad1)"
+            }}
+          >
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 2,
+                  bgcolor: alpha("#ffffff", 0.16)
+                }}
+              >
+                <PulseDot color="#ffffff" />
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="h6">Realtime monitor</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.86 }}>
+                  Live signals from search, AI, reviews, local, social, and authority checks.
+                </Typography>
+              </Box>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={live.scanProgress}
+              sx={{
+                mt: 2.5,
+                height: 8,
+                borderRadius: 99,
+                bgcolor: alpha("#ffffff", 0.2),
+                "& .MuiLinearProgress-bar": {
+                  bgcolor: "#ffffff",
+                  borderRadius: 99
+                }
+              }}
+            />
+            <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+              <Chip label={live.signalLabel} size="small" sx={{ color: "white", bgcolor: alpha("#ffffff", 0.18) }} />
+              <Chip label={live.lastUpdated} size="small" sx={{ color: "white", bgcolor: alpha("#ffffff", 0.18) }} />
+            </Stack>
+          </Box>
+
+          {cards.map((item) => (
+            <Paper key={item.label} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+                <Box
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: 2,
+                    color: item.color,
+                    bgcolor: alpha(item.color, 0.12),
+                    flexShrink: 0
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+                      {item.label}
+                    </Typography>
+                    {item.label === "Latest signal" ? <Chip label={tone.label} color={tone.color} size="small" /> : null}
+                  </Stack>
+                  <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 900, overflowWrap: "anywhere" }}>
+                    {item.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
+                    {item.detail}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+          ))}
+        </Box>
       </CardContent>
     </Card>
   );
@@ -695,6 +953,18 @@ function ApprovalQueue() {
 }
 
 function WorkLedger() {
+  const live = useLiveSignals();
+  const liveEvents = [
+    {
+      time: "Now",
+      title: live.activeEvent.title,
+      detail: live.activeEvent.detail,
+      module: live.activeEvent.module,
+      tone: live.activeEvent.tone
+    },
+    ...activityEvents
+  ];
+
   return (
     <Card>
       <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
@@ -702,13 +972,13 @@ function WorkLedger() {
           <Box>
             <Typography variant="h6">Work Ledger</Typography>
             <Typography variant="body2" color="text.secondary">
-              What changed, what was detected, and what was escalated
+              Live changes, detections, and escalations as they happen
             </Typography>
           </Box>
-          <AlertTriangle size={20} />
+          <PulseDot color={statusTone[live.activeEvent.tone].color === "error" ? "#ea5455" : "#28c76f"} />
         </Stack>
         <Stack spacing={2.2} sx={{ mt: 2.5 }}>
-          {activityEvents.map((event) => {
+          {liveEvents.map((event) => {
             const tone = statusTone[event.tone];
 
             return (
@@ -774,6 +1044,7 @@ function TopBar() {
         </Typography>
       </Stack>
       <Stack direction="row" spacing={1} sx={{ flexShrink: 0, alignItems: "center" }}>
+        <RealtimeTopStatus />
         <Tooltip title="Notifications">
           <IconButton aria-label="Notifications">
             <Badge color="error" variant="dot">
@@ -1812,6 +2083,9 @@ export function RadarDashboard() {
             </Stack>
 
             <CommandBrief />
+            <Box sx={{ mt: 3 }}>
+              <LiveSignalStrip />
+            </Box>
 
             <Box
               sx={{
