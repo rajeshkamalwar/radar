@@ -1,0 +1,27 @@
+# Local licensed/reference templates
+vuexy/
+documentation/
+*.zip
+
+# Dependencies and build outputs
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
