@@ -4,10 +4,13 @@ import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Bell,
   Bot,
   Building2,
   CheckCircle2,
+  ChevronRight,
   Compass,
+  FileCheck2,
   Gauge,
   Globe2,
   LineChart,
@@ -26,6 +29,9 @@ import {
 import type { ReactNode } from "react";
 import {
   alpha,
+  Avatar,
+  AvatarGroup,
+  Badge,
   Box,
   Button,
   Card,
@@ -47,6 +53,7 @@ import {
   TableHead,
   TableRow,
   ThemeProvider,
+  Tooltip,
   Toolbar,
   Typography
 } from "@mui/material";
@@ -87,6 +94,17 @@ const statusTone: Record<
   risk: { label: "Risk", color: "error" },
   growth: { label: "Growth", color: "success" }
 };
+
+const priorityTone: Record<
+  RadarModule["priority"],
+  { color: "success" | "warning" | "error"; label: string }
+> = {
+  High: { color: "error", label: "High priority" },
+  Medium: { color: "warning", label: "Medium priority" },
+  Low: { color: "success", label: "Low priority" }
+};
+
+const quickFilters = ["All", "Needs attention", "Ready to approve", "Growth", "Risks"];
 
 function Sidebar() {
   return (
@@ -224,9 +242,119 @@ function MetricCard({
   );
 }
 
+function CommandBrief() {
+  const briefItems = [
+    {
+      title: "Top priority",
+      value: "Sensitive review needs attention",
+      detail: "Safety and refund concerns should be reviewed before any auto-reply.",
+      icon: <AlertTriangle size={20} />,
+      color: "#ea5455"
+    },
+    {
+      title: "Ready to approve",
+      value: "4 actions waiting",
+      detail: "Review replies, search-friendly page details, and a creator shortlist.",
+      icon: <FileCheck2 size={20} />,
+      color: "#7367f0"
+    },
+    {
+      title: "Best opportunity",
+      value: "Buyer comparison page",
+      detail: "Competitors are showing up when buyers ask AI tools who to choose.",
+      icon: <TrendingUp size={20} />,
+      color: "#28c76f"
+    }
+  ];
+
+  return (
+    <Card>
+      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+        <Box
+          sx={{
+            p: 3,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", lg: "1.05fr repeat(3, minmax(0, 1fr))" },
+            gap: 2,
+            alignItems: "stretch"
+          }}
+        >
+          <Box
+            sx={{
+              p: 2.5,
+              borderRadius: 2,
+              color: "primary.contrastText",
+              background: "linear-gradient(135deg, #7367f0, #00bad1)"
+            }}
+          >
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  display: "grid",
+                  placeItems: "center",
+                  borderRadius: 2,
+                  bgcolor: alpha("#ffffff", 0.16)
+                }}
+              >
+                <Sparkles size={22} />
+              </Box>
+              <Box>
+                <Typography variant="h6">Today&apos;s command brief</Typography>
+                <Typography variant="body2" sx={{ opacity: 0.86 }}>
+                  What the team should act on first.
+                </Typography>
+              </Box>
+            </Stack>
+            <Stack direction="row" spacing={1} sx={{ mt: 2.5, flexWrap: "wrap", gap: 1 }}>
+              <Chip label="1 risk" size="small" sx={{ color: "white", bgcolor: alpha("#ffffff", 0.18) }} />
+              <Chip label="4 approvals" size="small" sx={{ color: "white", bgcolor: alpha("#ffffff", 0.18) }} />
+              <Chip label="12 areas checked" size="small" sx={{ color: "white", bgcolor: alpha("#ffffff", 0.18) }} />
+            </Stack>
+          </Box>
+
+          {briefItems.map((item) => (
+            <Paper key={item.title} variant="outlined" sx={{ p: 2.5, borderRadius: 2 }}>
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+                <Box
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    display: "grid",
+                    placeItems: "center",
+                    borderRadius: 2,
+                    color: item.color,
+                    bgcolor: alpha(item.color, 0.12),
+                    flexShrink: 0
+                  }}
+                >
+                  {item.icon}
+                </Box>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 900 }}>
+                    {item.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75 }}>
+                    {item.detail}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ModuleCard({ module }: { module: RadarModule }) {
   const Icon = iconMap[module.id as keyof typeof iconMap];
   const tone = statusTone[module.status];
+  const priority = priorityTone[module.priority];
 
   return (
     <Card>
@@ -248,7 +376,7 @@ function ModuleCard({ module }: { module: RadarModule }) {
               <Icon size={19} />
             </Box>
             <Box sx={{ minWidth: 0 }}>
-              <Typography variant="subtitle2" noWrap sx={{ fontWeight: 800 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, lineHeight: 1.25 }}>
                 {module.name}
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
@@ -256,7 +384,10 @@ function ModuleCard({ module }: { module: RadarModule }) {
               </Typography>
             </Box>
           </Stack>
-          <Chip label={tone.label} color={tone.color} size="small" variant="outlined" />
+          <Stack spacing={0.75} sx={{ alignItems: "flex-end" }}>
+            <Chip label={tone.label} color={tone.color} size="small" variant="outlined" />
+            <Chip label={priority.label} color={priority.color} size="small" variant="filled" />
+          </Stack>
         </Stack>
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2, minHeight: 42 }}>
@@ -296,6 +427,35 @@ function ModuleCard({ module }: { module: RadarModule }) {
             }
           }}
         />
+
+        <Stack direction="row" spacing={0.75} sx={{ mt: 2, flexWrap: "wrap", gap: 0.75 }}>
+          {module.kpis.map((kpi) => (
+            <Chip key={kpi} label={kpi} size="small" variant="outlined" />
+          ))}
+        </Stack>
+
+        <Paper
+          variant="outlined"
+          sx={{
+            mt: 2,
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: alpha(module.accent, 0.05),
+            borderColor: alpha(module.accent, 0.18)
+          }}
+        >
+          <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
+                Suggested next step
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.25, fontWeight: 800 }}>
+                {module.nextStep}
+              </Typography>
+            </Box>
+            <ChevronRight size={18} />
+          </Stack>
+        </Paper>
       </CardContent>
     </Card>
   );
@@ -530,6 +690,18 @@ function TopBar() {
         </Typography>
       </Stack>
       <Stack direction="row" spacing={1}>
+        <Tooltip title="Notifications">
+          <IconButton aria-label="Notifications">
+            <Badge color="error" variant="dot">
+              <Bell size={19} />
+            </Badge>
+          </IconButton>
+        </Tooltip>
+        <AvatarGroup max={3} sx={{ display: { xs: "none", md: "flex" }, mr: 0.5 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main", fontSize: 13 }}>RK</Avatar>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "success.main", fontSize: 13 }}>SEO</Avatar>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: "warning.main", fontSize: 13 }}>CX</Avatar>
+        </AvatarGroup>
         <Button variant="contained" startIcon={<Sparkles size={17} />}>
           Run scan
         </Button>
@@ -570,8 +742,11 @@ export function RadarDashboard() {
               <Chip color="success" label="Live signal scan" />
             </Stack>
 
+            <CommandBrief />
+
             <Box
               sx={{
+                mt: 3,
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr",
@@ -626,7 +801,17 @@ export function RadarDashboard() {
                         Each area shows what is working, what needs attention, and what to do next.
                       </Typography>
                     </Box>
-                    <Chip label="12 centers" color="primary" variant="outlined" />
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                      {quickFilters.map((filter, index) => (
+                        <Chip
+                          key={filter}
+                          label={filter}
+                          color={index === 0 ? "primary" : "default"}
+                          variant={index === 0 ? "filled" : "outlined"}
+                          size="small"
+                        />
+                      ))}
+                    </Stack>
                   </Stack>
                   <Box
                     sx={{
